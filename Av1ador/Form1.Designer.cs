@@ -1,4 +1,4 @@
-﻿namespace Av1ador
+namespace Av1ador
 {
     partial class Form1
     {
@@ -2324,7 +2324,8 @@
             "HEVC (nvenc)",
             "H264 (x264)",
             "H264 (nvenc)",
-            "MPEG4 (xvid)"});
+            "MPEG4 (xvid)",
+            "VVC (x266)"});
             this.cvComboBox.Name = "cvComboBox";
             this.cvComboBox.Size = new System.Drawing.Size(85, 24);
             this.cvComboBox.DropDown += new System.EventHandler(this.FormatComboBox_DropDown);
