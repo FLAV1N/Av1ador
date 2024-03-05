@@ -13,9 +13,9 @@ namespace Av1ador
         public const string resdir = "resource\\\\";
         private readonly string gpu_name;
         private int ba;
-        private readonly string[] v = new string[] { "AV1 (aom)", "AV1 (svt)", "AV1 (rav1e)", "AV1 (nvenc)", "VP9 (vpx)", "HEVC (x265)", "HEVC (nvenc)", "H264 (x264)", "H264 (nvenc)", "MPEG4 (xvid)" };
-        private readonly string[] j = new string[] { "mkv", "ivf" };
-        private readonly string[] a = new string[] { "aac", "opus", "vorbis", "mp3" };
+        private readonly string[] v = new string[] { "AV1 (aom)", "AV1 (svt)", "AV1 (rav1e)", "AV1 (nvenc)", "VP9 (vpx)", "HEVC (x265)", "HEVC (nvenc)", "H264 (x264)", "H264 (nvenc)", "MPEG4 (xvid)", "VVC (x266)" };
+        private readonly string[] j = new string[] { "mkv", "ivf", "mp4", "avi", "266" };
+        private readonly string[] a = new string[] { "aac", "opus", "vorbis", "mp3", "none" };
         private readonly string[] c = new string[] { "2 (stereo)", "6 (surround 5.1)", "8 (surround 7.1)", "1 (mono)" };
         private string speed_str;
         public static bool Libfdk { get; set; }
@@ -122,9 +122,10 @@ namespace Av1ador
         {
             switch (format)
             {
+
                 case "mp4":
                     A_codecs = new string[] { a[0], a[1], a[3] };
-                    V_codecs = new string[] { v[0], v[1], v[2], v[3], v[4], v[5], v[6], v[7], v[8], v[9]  };
+                    V_codecs = new string[] { v[0], v[1], v[2], v[3], v[4], v[5], v[6], v[7], v[8], v[9], v[10] };
                     V_codecs = CheckNvidia(V_codecs);
                     break;
                 case "mkv":
@@ -140,6 +141,10 @@ namespace Av1ador
                     A_codecs = new string[] { a[3], a[1] };
                     V_codecs = new string[] { v[9], v[4], v[5], v[6], v[7], v[8] };
                     V_codecs = CheckNvidia(V_codecs);
+                    break;
+                case "266":
+                    A_codecs = new string[] { a[4] };
+                    V_codecs = new string[] { v[10] };
                     break;
             }
         }
@@ -265,7 +270,7 @@ namespace Av1ador
                 Params = "-bf:v 4 -b_adapt 0 -spatial-aq 1 -temporal-aq 1 -aq-strength 7 -coder 1 -b_ref_mode 2";
                 Color = " -color_primaries 1 -color_trc 1 -colorspace 1";
             }
-            else
+            else if (codec == v[9])
             {
                 Cv = "libxvid";
                 Max_crf = 31;
@@ -275,6 +280,17 @@ namespace Av1ador
                 Presets = new string[] { "" };
                 speed_str = "";
                 Params = "-g !maxkey! -mbd rd -trellis 1 -flags +mv4+aic+cgop -variance_aq 1 -bf 3 -b_qoffset 10";
+                Color = " -color_primaries 1 -color_trc 1 -colorspace 1";
+            }
+            else
+            {
+                Cv = "libvvenc";
+                Crf = 30;
+                Bit_depth = new string[] { "10" };
+                Job = j[4];
+                Presets = new string[] { "slower", "slow", "medium", "fast", "faster" };
+                speed_str = "-preset ";
+                Params = "-vvenc-params threads=!threads!";
                 Color = " -color_primaries 1 -color_trc 1 -colorspace 1";
             }
         }
@@ -306,6 +322,10 @@ namespace Av1ador
                 A_min = 48;
                 A_Job = "ogg";
                 Channels = new string[] { c[0], c[1], c[2], c[3] };
+            }
+            else if (codec == a[4])
+            {
+                Ca = "none";
             }
             else
             {
@@ -694,7 +714,7 @@ namespace Av1ador
                 str += " -vf " + String.Join(",", vf.ToArray());
             }
             str += " -pix_fmt " + (Bits == 8 ? "yuv420p" : "yuv420p10le");
-            str += " -fps_mode vfr";
+            str += " -fps_mode cfr";
             if (V_kbps > 0)
             {
                 str += " -b:v !bitrate!k";
@@ -713,6 +733,8 @@ namespace Av1ador
                     str += " -maxrate:v 200M -cq:v ";
                 else if (Cv == "librav1e")
                     str += " -rav1e-params quantizer=";
+                else if (Cv == "libvvenc")
+                    str += " -qp ";
                 else
                     str += " -crf ";
                 str += Crf.ToString();
@@ -726,7 +748,10 @@ namespace Av1ador
             str += " -an";
             if ((V_kbps > 0 || always_2p) && Multipass != "" && !predict)
                 str = Pass(str) + " -loglevel error -f null NUL && ffmpeg" + Pass(str, 2);
-            str += " -map 0:v:0 -muxpreload 0 -muxdelay 0 -mpegts_copyts 1 -bsf:v dump_extra \"!name!\"";
+            if ( Cv == "libvvenc")
+                str += " -map 0:v:0 \"!name!\"";
+            else 
+                str += " -map 0:v:0 -muxpreload 0 -muxdelay 0 -mpegts_copyts 1 -bsf:v dump_extra \"!name!\"";
             return str;
         }
 
