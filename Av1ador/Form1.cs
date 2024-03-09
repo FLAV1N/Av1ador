@@ -26,7 +26,7 @@ namespace Av1ador
         static extern bool GetCursorPos(ref Point point);
 
         private readonly string title = "Av1ador 1.2.9";
-        private readonly Regex formatos = new Regex(".+(mkv|mp4|avi|webm|ivf|m2ts|wmv|mpg|mov|3gp|ts|mpeg|y4m|vob|m2v|m4v|flv|asf|png|266)$", RegexOptions.IgnoreCase);
+        private readonly Regex formatos = new Regex(".+(mkv|mp4|avi|webm|ivf|m2ts|wmv|mpg|mov|3gp|ts|mpeg|y4m|vob|m2v|m4v|flv|asf|png)$", RegexOptions.IgnoreCase);
         private Player mpv;
         private Video primer_video, segundo_video;
         private double panx, pany, panx_ratio, pany_ratio;
