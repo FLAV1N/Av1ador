@@ -564,7 +564,7 @@ namespace Av1ador
             };
             bw.RunWorkerCompleted += (s, e) => {
                 Status.Remove("Merging segments...");
-                Cleanup();
+                //Cleanup();
                 Finished = true;
             };
             bw.RunWorkerAsync();
@@ -592,7 +592,7 @@ namespace Av1ador
             {
                 System.IO.File.Delete(Tempdir + "concat.txt");
             } catch { }
-        }
+        } 
 
         public void Background(Segment chunk)
         {
@@ -851,8 +851,8 @@ namespace Av1ador
                     File.AppendAllText(Pathfile + ".txt", output);
                     return output;
                 }
-                if (Math.Abs(Video.Get_duration(Video.Get_info(Pathfile), out string _, Pathfile) - Length) > 2 && !Last)
-                    return Pathfile + "\r\nThe segment has finished but there is a mismatch in the duration.\r\nUsually this means that ffmpeg crashed.";
+/*                 if (Math.Abs(Video.Get_duration(Video.Get_info(Pathfile), out string _, Pathfile) - Length) > 2 && !Last)
+                    return Pathfile + "\r\nThe segment has finished but there is a mismatch in the duration.\r\nUsually this means that ffmpeg crashed."; */
             }
             File.Delete(Pathfile + ".txt");
             if (multi)

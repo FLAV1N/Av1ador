@@ -2291,7 +2291,8 @@
             "mp4",
             "mkv",
             "webm",
-            "avi"});
+            "avi",
+            "266"});
             this.formatComboBox.Name = "formatComboBox";
             this.formatComboBox.Size = new System.Drawing.Size(55, 23);
             this.formatComboBox.DropDown += new System.EventHandler(this.FormatComboBox_DropDown);
@@ -2324,7 +2325,8 @@
             "HEVC (nvenc)",
             "H264 (x264)",
             "H264 (nvenc)",
-            "MPEG4 (xvid)"});
+            "MPEG4 (xvid)",
+            "VVC (x266)"});
             this.cvComboBox.Name = "cvComboBox";
             this.cvComboBox.Size = new System.Drawing.Size(85, 24);
             this.cvComboBox.DropDown += new System.EventHandler(this.FormatComboBox_DropDown);
@@ -2464,7 +2466,8 @@
             "aac",
             "opus",
             "vorbis",
-            "mp3"});
+            "mp3",
+            "none"});
             this.caComboBox.Name = "caComboBox";
             this.caComboBox.Size = new System.Drawing.Size(60, 23);
             this.caComboBox.DropDown += new System.EventHandler(this.FormatComboBox_DropDown);
@@ -2520,7 +2523,7 @@
             // 
             // openFileDialog1
             // 
-            this.openFileDialog1.Filter = "Video Files|*.mkv;*.mp4;*.avi;*.webm;*.m2ts;*.wmv;*.mpg;*.mov;*.3gp;*.ts;*.mpeg;*" +
+            this.openFileDialog1.Filter = "Video Files|*.mkv;*.mp4;*.avi;*.webm;*.m2ts;*.wmv;*.mpg;*.mov;*.3gp;*.ts;*.mpeg;*.266;*" +
     ".y4m;*.vob;*.m4v|All Files (*.*)|*.*";
             this.openFileDialog1.Multiselect = true;
             // 
