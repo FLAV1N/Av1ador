@@ -17,6 +17,7 @@ jobs:
       with:
         tag: "v1.2.4"
         fileName: "Av1ador.zip"
+        token: ${{ secrets.DOWNLOAD_TOKEN }}
     - name: Extract Release
       run: 7z x Av1ador.zip -oD:Av1ador\bin\Release\
     - name: Build DotNET35
