@@ -564,7 +564,7 @@ namespace Av1ador
             };
             bw.RunWorkerCompleted += (s, e) => {
                 Status.Remove("Merging segments...");
-                //Cleanup();
+                Cleanup();
                 Finished = true;
             };
             bw.RunWorkerAsync();
