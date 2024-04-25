@@ -25,7 +25,7 @@ namespace Av1ador
         [DllImport("user32.dll")]
         static extern bool GetCursorPos(ref Point point);
 
-        private readonly string title = "Av1ador 1.2.9";
+        private readonly string title = "Av1ador 1.2.10";
         private readonly Regex formatos = new Regex(".+(mkv|mp4|avi|webm|ivf|m2ts|wmv|mpg|mov|3gp|ts|mpeg|y4m|vob|m2v|m4v|flv|asf|png)$", RegexOptions.IgnoreCase);
         private Player mpv;
         private Video primer_video, segundo_video;
@@ -186,9 +186,12 @@ namespace Av1ador
                     primer_video.EndTime = entry.End;
                     primer_video.CreditsTime = entry.Credits;
                     primer_video.CreditsEndTime = entry.CreditsEnd;
-                    cvComboBox.SelectedIndex = entry.Cv;
+                    cvComboBox.SelectedIndex = cvComboBox.Items.IndexOf(entry.Cv);
+                    if (cvComboBox.SelectedIndex == -1)
+                        cvComboBox.SelectedIndex = 0;
+                    else
+                        paramsBox.Text = entry.Param == "" ? encoder.Params_replace((int)Math.Round(primer_video.Fps)) : encoder.Params_replace((int)Math.Round(primer_video.Fps), entry.Param);
                     speedComboBox.Text = entry.Speed;
-                    paramsBox.Text = entry.Param == "" ? encoder.Params_replace((int)Math.Round(primer_video.Fps)) : encoder.Params_replace((int)Math.Round(primer_video.Fps), entry.Param);
                     bitsComboBox.Text = entry.Bits;
                     if (entry.Crf > numericUpDown1.Maximum)
                         return;
@@ -536,7 +539,7 @@ namespace Av1ador
                 Vf = "",
                 Af = "",
                 Gs = gsUpDown.Value.ToString(),
-                Cv = cvComboBox.SelectedIndex,
+                Cv = cvComboBox.Text,
                 Bits = bitsComboBox.Text,
                 Param = paramsBox.Text,
                 Crf = (int)numericUpDown1.Value,
@@ -2301,7 +2304,7 @@ namespace Av1ador
             if (primer_video != null)
             {
                 listBox1.SelectedIndexChanged -= new EventHandler(ListBox1_SelectedIndexChanged);
-                Entry.Update(field, primer_video, listBox1, vfListBox, afListBox, gsUpDown.Value.ToString(), cvComboBox.SelectedIndex, bitsComboBox.Text, paramsBox.Text, (int)numericUpDown1.Value, int.Parse(abitrateBox.Text), bitrateBox.Text, track, resComboBox.Text, speedComboBox.Text);
+                Entry.Update(field, primer_video, listBox1, vfListBox, afListBox, gsUpDown.Value.ToString(), cvComboBox.Text, bitsComboBox.Text, paramsBox.Text, (int)numericUpDown1.Value, int.Parse(abitrateBox.Text), bitrateBox.Text, track, resComboBox.Text, speedComboBox.Text);
                 listBox1.SelectedIndexChanged += new EventHandler(ListBox1_SelectedIndexChanged);
             }
         }
