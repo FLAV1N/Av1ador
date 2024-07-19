@@ -25,7 +25,7 @@ namespace Av1ador
         [DllImport("user32.dll")]
         static extern bool GetCursorPos(ref Point point);
 
-        private readonly string title = "Av1ador 1.2.10";
+        private readonly string title = "Av1ador 1.3.1";
         private readonly Regex formatos = new Regex(".+(mkv|mp4|avi|webm|ivf|m2ts|wmv|mpg|mov|3gp|ts|mpeg|y4m|vob|m2v|m4v|flv|asf|png)$", RegexOptions.IgnoreCase);
         private Player mpv;
         private Video primer_video, segundo_video;
@@ -75,11 +75,8 @@ namespace Av1ador
         {
             Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
             Text = title;
-            string exes = Func.Exes();
 
             encoder = new Encoder();
-            Encoder.Libfdk = exes.Contains("enable-libfdk-aac");
-            Encoder.Libplacebo = exes.Contains("enable-libplacebo");
             workersUpDown.Maximum = encoder.Cores;
             workersgroupBox.GetType().GetProperty("DoubleBuffered", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).SetValue(workersgroupBox, true, null);
             listBox1.GetType().GetProperty("DoubleBuffered", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).SetValue(listBox1, true, null);
@@ -1218,6 +1215,12 @@ namespace Av1ador
 
         private void EncodestopButton_Click(object sender, EventArgs e)
         {
+            if (mpv.Mpv2_loaded && segundo_video != null)
+            {
+                segundo_video = null;
+                mpv.Cmd("stop", 2);
+                UpdateLayout(true);
+            }
             encodestopButton.Enabled = false;
             encode?.Set_state(true);
             Thread thread = new Thread(() => Exit(true));
@@ -1322,8 +1325,7 @@ namespace Av1ador
                     encode.A_Job = encoder.A_Job;
                     delay = primer_video.Tracks_delay[checkedListBox1.CheckedIndices[0]];
                 }
-                double to = primer_video.EndTime != primer_video.Duration ? primer_video.EndTime : primer_video.Duration + 1;
-                encode.Start_encode(folderBrowserDialog1.SelectedPath, primer_video.File, primer_video.StartTime, to, primer_video.CreditsTime, primer_video.CreditsEndTime, primer_video.Timebase, primer_video.Kf_interval, (primer_video.Width <= 1920 || primer_video.Kf_fixed), checkedListBox1.CheckedItems.Count > 0, delay, encoder.V_kbps, encoder.Out_spd, encodelistButton.Checked);
+                encode.Start_encode(folderBrowserDialog1.SelectedPath, primer_video, checkedListBox1.CheckedItems.Count > 0, delay, encoder.V_kbps, encoder.Out_spd, encodelistButton.Checked);
                 listBox1.Refresh();
             }
             else if (encodestopButton.Enabled && encode.Finished)

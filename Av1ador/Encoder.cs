@@ -20,6 +20,8 @@ namespace Av1ador
         private string speed_str;
         public static bool Libfdk { get; set; }
         public static bool Libplacebo { get; set; }
+        public static string OCL_Device { get; set; }
+        public static string Vkn_Device { get; set; }
         public string[] Resos { get; set; }
         public int Max_crf { get; set; }
         public int Crf { get; set; }
@@ -106,6 +108,12 @@ namespace Av1ador
             Vf = new List<string>();
             Af = new List<string>();
             Multipass = "";
+
+            string[] exes = Func.Exes();
+            OCL_Device = exes[1];
+            Vkn_Device = exes[2];
+            Libfdk = exes[0].Contains("enable-libfdk-aac");
+            Libplacebo = exes[0].Contains("enable-libplacebo") && Vkn_Device != "";
         }
         private string[] CheckNvidia(string[] vtags)
         {
@@ -164,7 +172,7 @@ namespace Av1ador
                 Job = j[1];
                 Presets = new string[] { "0 (slowest)", "1", "2", "3", "*4", "5", "6", "7", "8 (fastest)" };
                 speed_str = "-cpu-used ";
-                Params = "-tune 1 -enable-restoration 0 -threads !threads! -tiles 2x1 -keyint_min !minkey! -g !maxkey! -aom-params sharpness=4:max-gf-interval=20:gf-max-pyr-height=4:disable-trellis-quant=2:denoise-noise-level=!gs!:enable-dnl-denoising=0:denoise-block-size=16:arnr-maxframes=3:arnr-strength=4:max-reference-frames=4:enable-rect-partitions=0:enable-filter-intra=0:enable-masked-comp=0:enable-qm=1:qm-min=0:qm-max=5 -strict -2";
+                Params = "-tune 1 -enable-restoration 0 -threads !threads! -tiles 2x1 -keyint_min !minkey! -g !maxkey! -aom-params sharpness=4:max-gf-interval=20:gf-max-pyr-height=5:disable-trellis-quant=2:denoise-noise-level=!gs!:enable-dnl-denoising=0:denoise-block-size=16:arnr-maxframes=3:arnr-strength=4:max-reference-frames=4:enable-rect-partitions=0:enable-filter-intra=0:enable-masked-comp=0:enable-qm=1:qm-min=0:qm-max=5 -strict -2";
                 Color = " -color_primaries 1 -color_trc 1 -colorspace 1";
                 Gs = 100;
                 Rate = 0.82;
@@ -256,7 +264,7 @@ namespace Av1ador
                 Job = j[0];
                 Presets = new string[] { "placebo", "*veryslow", "slower", "slow", "medium", "fast", "faster", "veryfast", "superfast", "ultrafast" };
                 speed_str = "-preset ";
-                Params = "-x264opts threads=!threads!:min-keyint=!minkey!:keyint=!maxkey!:stitchable=1";
+                Params = "-x264opts min-keyint=!minkey!:keyint=!maxkey!:stitchable=1";
                 Color = ":colorprim=bt709:transfer=bt709:colormatrix=bt709";
                 Multipass = "-pass 1 -passlogfile \"!log!\"";
             }
@@ -703,12 +711,12 @@ namespace Av1ador
                 {
                     if (s.Contains("libplacebo") && Libplacebo)
                     {
-                        str += " -init_hw_device vulkan";
+                        str += " -init_hw_device vulkan:" + Vkn_Device;
                         break;
                     }
                     if (s.Contains("opencl"))
                     {
-                        str += " -init_hw_device opencl=gpu -filter_hw_device gpu";
+                        str += " -init_hw_device opencl:" + OCL_Device;
                         break;
                     }
                 }

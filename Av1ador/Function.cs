@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
@@ -15,16 +16,16 @@ namespace Av1ador
     {
         public static readonly string bindir = "bin\\";
 
-        public static string Exes()
+        public static string[] Exes()
         {
             string msg = "";
-            string output = "";
+            string[] output = new string[3];
             Process process = new Process();
             Setinicial(process, 3);
             try
             {
                 process.Start();
-                output = process.StandardError.ReadToEnd();
+                output[0] = process.StandardError.ReadToEnd();
             }
             catch
             {
@@ -53,6 +54,26 @@ namespace Av1ador
             if (msg != "")
                 if (MessageBox.Show(msg, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error) == DialogResult.OK)
                     Environment.Exit(0);
+            Setinicial(process, 3, " -hide_banner -init_hw_device list");
+            process.Start();
+            string types = process.StandardOutput.ReadToEnd();
+            if (types.Contains("opencl"))
+            {
+                process.StartInfo.Arguments = " -hide_banner -v debug -init_hw_device opencl";
+                process.Start();
+                output[1] = new Regex(@"[0-9]+\.[0-9]+: ").Match(process.StandardError.ReadToEnd()).Value.Replace(":", "").Trim();
+            }
+            else
+            {
+                if (MessageBox.Show("No OpenCL device found.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error) == DialogResult.OK)
+                    Environment.Exit(0);
+            }
+            if (types.Contains("vulkan"))
+            {
+                process.StartInfo.Arguments = " -hide_banner -v debug -init_hw_device vulkan";
+                process.Start();
+                output[2] = new Regex(@"[0-9\.]+:").Match(new Regex(@"GPU listing:[\n\r]*.*[0-9]+: ").Match(process.StandardError.ReadToEnd()).Value).Value.Replace(":", "").Trim();
+            }
             return output;
         }
 
@@ -113,7 +134,7 @@ namespace Av1ador
         {
             str = Regex.Replace(str, "-(" + param + " )[0-9]+ ", m => replace == "" ? "" : "-" + m.Groups[1].Value + replace + " ");
             str = Regex.Replace(str, "([\\s:]+)(" + param + "=)[0-9]+", m => replace == "" ? "" : m.Groups[1].Value + m.Groups[2].Value + replace);
-            return str.Replace("::", ":").Replace("params :", "params ").Replace(": "," ");
+            return str.Replace("::", ":").Replace("params :", "params ").Replace(": ", " ");
         }
 
         public static string Replace_gs(string str, int gs_level)
@@ -277,6 +298,30 @@ namespace Av1ador
                 unit = "GB";
             }
             return size.ToString() + unit;
+        }
+
+        public static List<string> Concat(List<string>[] list, bool sort = true)
+        {
+            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+            var concatenated = list[0];
+            for (int i = 1; i < list.Length; i++)
+            {
+                if (i > 0)
+                    concatenated = concatenated.Concat(list[i].Skip(1).Take(list[i].Count - 1)).ToList();
+                else
+                    concatenated = concatenated.Concat(list[i]).ToList();
+            }
+            if (!sort)
+                return concatenated;
+            try
+            {
+                List<double> result = concatenated.Select(x => double.Parse(x)).ToList();
+                result.Sort();
+                return result.Select(i => i.ToString()).ToList();
+            } catch
+            {
+                return concatenated;
+            }
         }
     }
 }
